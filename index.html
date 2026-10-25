@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#2563eb" />
+  <title>我的工作台</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1 id="pageTitle">今日</h1>
+  </header>
+
+  <main id="app">
+    <section id="tab-today" class="tab active">
+      <div id="todayContent"></div>
+    </section>
+
+    <section id="tab-projects" class="tab">
+      <div class="section-head">
+        <h2>项目</h2>
+        <button class="primary small" id="newProjectBtn">＋新建项目</button>
+      </div>
+      <div class="domain-bar" id="domainBar">
+        <button class="chip active" data-domain="全部">全部</button>
+        <button class="chip" data-domain="学习">学习</button>
+        <button class="chip" data-domain="生活">生活</button>
+        <button class="chip" data-domain="健康">健康</button>
+        <button class="chip" data-domain="长期目标">长期目标</button>
+        <button class="chip" data-domain="习惯/周期学习">习惯/周期学习</button>
+      </div>
+      <div id="projectList"></div>
+    </section>
+
+    <section id="tab-inbox" class="tab">
+      <div class="section-head">
+        <h2>收件箱</h2>
+        <span class="hint">先记下来，不用马上整理</span>
+      </div>
+      <div id="inboxList"></div>
+    </section>
+
+    <section id="tab-review" class="tab">
+      <div id="reviewContent"></div>
+    </section>
+
+    <section id="tab-settings" class="tab">
+      <div class="section-head">
+        <h2>设置与备份</h2>
+      </div>
+      <div id="settingsContent"></div>
+    </section>
+  </main>
+
+  <button id="fab" class="fab" title="快速记录">＋</button>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-tab="today">今日</button>
+    <button class="nav-btn" data-tab="projects">项目</button>
+    <button class="nav-btn" data-tab="inbox">收件箱</button>
+    <button class="nav-btn" data-tab="review">复盘</button>
+    <button class="nav-btn" data-tab="settings">设置</button>
+  </nav>
+
+  <!-- 快速记录 -->
+  <div class="modal hidden" id="quickModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>快速记录</h3>
+        <button class="icon-btn close-modal" data-close="quickModal">×</button>
+      </div>
+      <form id="quickForm">
+        <textarea id="quickText" rows="5" placeholder="记想法、待办、灵感……" required></textarea>
+        <p class="hint">保存后进入收件箱。图片/文件下一阶段支持。</p >
+        <div class="actions">
+          <button type="button" class="secondary close-modal" data-close="quickModal">取消</button>
+          <button type="submit" class="primary">保存到收件箱</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 新建项目 -->
+  <div class="modal hidden" id="projectFormModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>新建项目</h3>
+        <button class="icon-btn close-modal" data-close="projectFormModal">×</button>
+      </div>
+      <form id="projectForm">
+        <label>项目名称<input id="projectName" required placeholder="例如：高等数学" /></label>
+        <label>领域
+          <select id="projectDomain">
+            <option>学习</option>
+            <option>生活</option>
+            <option>健康</option>
+            <option>长期目标</option>
+            <option>习惯/周期学习</option>
+          </select>
+        </label>
+        <label>目标<input id="projectGoal" placeholder="例如：期末85+" /></label>
+        <label>截止时间<input id="projectDeadline" type="date" /></label>
+        <label>下一步行动<input id="projectNextAction" placeholder="例如：第三章作业" /></label>
+        <div class="actions">
+          <button type="button" class="secondary close-modal" data-close="projectFormModal">取消</button>
+          <button type="submit" class="primary">保存项目</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 项目详情 -->
+  <div class="modal hidden" id="projectDetailModal">
+    <div class="modal-card wide">
+      <div class="modal-head">
+        <h3>项目详情</h3>
+        <button class="icon-btn close-modal" data-close="projectDetailModal">×</button>
+      </div>
+      <div id="projectDetailContent"></div>
+    </div>
+  </div>
+
+  <!-- 新建任务 / 转任务 -->
+  <div class="modal hidden" id="taskFormModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="taskFormTitle">新建任务</h3>
+        <button class="icon-btn close-modal" data-close="taskFormModal">×</button>
+      </div>
+      <form id="taskForm">
+        <label>任务标题<input id="taskTitle" required placeholder="例如：第三章作业" /></label>
+        <label>所属项目<select id="taskProject" required></select></label>
+        <label>优先级
+          <select id="taskPriority">
+            <option value="高">高</option>
+            <option value="中" selected>中</option>
+            <option value="低">低</option>
+          </select>
+        </label>
+        <label>截止时间<input id="taskDeadline" type="date" /></label>
+        <label>预计耗时（分钟）<input id="taskEstimate" type="number" min="0" placeholder="例如：60" /></label>
+        <label>下一步行动<input id="taskNextAction" placeholder="例如：先看例题1-3，再做第1题" /></label>
+        <label>标签（逗号分隔）<input id="taskTags" placeholder="例如：作业,需要查资料" /></label>
+        <div class="actions">
+          <button type="button" class="secondary close-modal" data-close="taskFormModal">取消</button>
+          <button type="submit" class="primary">保存任务</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 任务详情 -->
+  <div class="modal hidden" id="taskDetailModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>任务详情</h3>
+        <button class="icon-btn close-modal" data-close="taskDetailModal">×</button>
+      </div>
+      <div id="taskDetailContent"></div>
+    </div>
+  </div>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
